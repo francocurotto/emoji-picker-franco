@@ -21,16 +21,33 @@ EmojiPickerApplet.prototype = {
         this.menu = new Applet.AppletPopupMenu(this, orientation);
         this.menuManager.addMenu(this.menu);
 
-        // List of emojis
-        let emojis = ["😀", "😂", "😍", "👍", "🎉", "🔥", "❤️"];
+        // Emoji grid
+        let emojis = ["😀", "😂", "😍", "👍", "🎉", "🔥", "❤️", "😎", "🥳", "🤔", "😭", "😡"];
 
-        emojis.forEach(e => {
-            let item = new PopupMenu.PopupMenuItem(e);
-            item.connect('activate', () => {
+        // A container for our grid
+        let grid = new St.BoxLayout({ vertical: true });
+
+        let row;
+        emojis.forEach((e, i) => {
+            if (i % 4 === 0) {  // every 4 emojis, start a new row
+                row = new St.BoxLayout({ vertical: false });
+                grid.add(row);
+            }
+
+            let button = new St.Button({ label: e, style_class: "emoji-button" });
+            button.connect('clicked', () => {
                 Clipboard.set_text(CLIPBOARD_TYPE, e);
             });
-            this.menu.addMenuItem(item);
+
+            row.add(button);
         });
+
+        // Add grid to menu
+        let gridItem = new PopupMenu.PopupBaseMenuItem({ reactive: false });
+        //gridItem.actor.add(grid);
+        gridItem.add_child(grid)
+        this.menu.addMenuItem(gridItem);
+
     },
 
     on_applet_clicked: function() {

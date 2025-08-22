@@ -1,0 +1,1 @@
+cp -f {applet.js,metadata.json,stylesheet.css} ~/.local/share/cinnamon/applets
