@@ -21,33 +21,41 @@ EmojiPickerApplet.prototype = {
         this.menu = new Applet.AppletPopupMenu(this, orientation);
         this.menuManager.addMenu(this.menu);
 
-        // Emoji grid
-        let emojis = ["😀", "😂", "😍", "👍", "🎉", "🔥", "❤️", "😎", "🥳", "🤔", "😭", "😡"];
-
-        // A container for our grid
+        // Emoji grid (replace your old list code with this)
+        let emojis = ["😀","😂","😍","👍","🎉","🔥","❤️","😎","🥳","🤔","😭","😡"];
+        
+        const COLS = 4;
+        
+        // Build the grid (rows of buttons)
         let grid = new St.BoxLayout({ vertical: true });
-
-        let row;
+        
+        // helper to be compatible with different Cinnamon versions
+        function addTo(container, child) {
+            if (container.add_child) container.add_child(child);
+            else if (container.add_actor) container.add_actor(child);
+            else container.set_child?.(child); // fallback for bins
+        }
+        
+        let row = null;
         emojis.forEach((e, i) => {
-            if (i % 4 === 0) {  // every 4 emojis, start a new row
+            if (i % COLS === 0) {
                 row = new St.BoxLayout({ vertical: false });
-                grid.add(row);
+                addTo(grid, row);
             }
 
-            let button = new St.Button({ label: e, style_class: "emoji-button" });
+            let button = new St.Button({ label: e, style_class: "emoji-button", can_focus: true });
             button.connect('clicked', () => {
                 Clipboard.set_text(CLIPBOARD_TYPE, e);
+                this.menu.close();   // 👈 closes the menu right after clicking
             });
 
-            row.add(button);
+            addTo(row, button);
         });
 
-        // Add grid to menu
-        let gridItem = new PopupMenu.PopupBaseMenuItem({ reactive: false });
-        //gridItem.actor.add(grid);
-        gridItem.add_child(grid)
-        this.menu.addMenuItem(gridItem);
-
+        // Put the grid into the menu
+        let section = new PopupMenu.PopupMenuSection();
+        this.menu.addMenuItem(section);
+        addTo(section.actor, grid);
     },
 
     on_applet_clicked: function() {
